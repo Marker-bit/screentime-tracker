@@ -5,6 +5,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { t } from "@/intl";
 import { useSettingsStore } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
@@ -65,18 +66,22 @@ export function ChangePasswordButton({
             </div>
             <div className="flex flex-col gap-2 items-center text-center">
               <h1 className="font-semibold text-3xl">
-                {step === "prev-password"
-                  ? "Введите ваш текущий пароль"
-                  : step === "password"
-                    ? "Введите новый пароль"
-                    : "Подтвердите новый пароль"}
+                {t(
+                  step === "prev-password"
+                    ? "enterPreviousPassword"
+                    : step === "password"
+                      ? "enterNewPassword"
+                      : "confirmNewPassword",
+                )}
               </h1>
               <p className="text-sm text-muted-foreground max-w-[60%]">
-                {step === "prev-password"
-                  ? "Для смены пароля требуется ввести установленный до текущего момента пароль"
-                  : step === "password"
-                    ? "Введите пароль, который вы хотите установить"
-                    : "Для подтверждения пароля введите его повторно"}
+                {t(
+                  step === "prev-password"
+                    ? "enterPreviousPasswordDesc"
+                    : step === "password"
+                      ? "enterNewPasswordDesc"
+                      : "confirmNewPasswordDesc",
+                )}
               </p>
             </div>
             <InputOTP
@@ -103,7 +108,7 @@ export function ChangePasswordButton({
                 }
                 if (step === "confirm") {
                   if (setPassword !== confirmPassword) {
-                    toast.error("Пароли не совпадают");
+                    toast.error(t("passwordsDoNotMatch"));
                     setConfirmPassword("");
                     return;
                   }
@@ -130,9 +135,9 @@ export function ChangePasswordButton({
         ) : (
           <div className="min-h-60 w-full flex flex-col text-center gap-2 items-center justify-center">
             <CircleCheck className="size-8 shrink-0" />
-            <h1 className="font-semibold text-3xl">Новый пароль задан</h1>
+            <h1 className="font-semibold text-3xl">{t("newPasswordSet")}</h1>
             <p className="text-sm text-muted-foreground max-w-[60%]">
-              Теперь вы можете использовать его для входа
+              {t("newPasswordSetDescription")}
             </p>
             <Button
               className="mt-4"
@@ -140,7 +145,7 @@ export function ChangePasswordButton({
                 setOpen(false);
               }}
             >
-              Закрыть
+              {t("close")}
             </Button>
           </div>
         )}

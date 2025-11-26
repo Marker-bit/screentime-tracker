@@ -2,10 +2,21 @@ import { AutoStartControlSwitch } from "@/components/autostart-control";
 import { ChangePasswordButton } from "@/components/change-password-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { t } from "@/intl";
 import { useSettingsStore } from "@/lib/settings";
 import {
   ArrowUp10Icon,
+  GlobeIcon,
   KeyIcon,
   LayoutGrid,
   LayoutGridIcon,
@@ -31,49 +42,68 @@ export function Settings({ onLock }: { onLock: () => void }) {
       </Button>
       <div className="text-muted-foreground flex gap-2 items-center">
         <MonitorIcon className="size-4" />
-        Интерфейс
+        {t("interface")}
       </div>
       <div className="rounded-xl bg-secondary text-secondary-foreground px-4 py-2 flex items-center gap-2 justify-between">
         <div className="font-semibold flex gap-2 items-center">
           <ArrowUp10Icon className="size-4" />
-          Отключить анимацию чисел
+          {t("disableNumberAnimation")}
         </div>
         <Switch
           checked={settings.disableAnimation}
           onCheckedChange={(value) => {
-            console.log(value);
             setSettings({ ...settings, disableAnimation: value });
           }}
         />
       </div>
+      <div className="rounded-xl bg-secondary text-secondary-foreground px-4 py-2 flex flex-col gap-2">
+        <div className="font-semibold flex gap-2 items-center">
+          <GlobeIcon className="size-4" />
+          {t("appLanguage")}
+        </div>
+        <Select
+          value={settings.language}
+          onValueChange={(value) => {
+            setSettings({ ...settings, language: value });
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder={t("chooseLanguage")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ru">Русский</SelectItem>
+            <SelectItem value="en">English</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <div className="text-muted-foreground flex gap-2 items-center">
         <PcCase className="size-4" />
-        Система
+        {t("system")}
       </div>
       <div className="rounded-xl bg-secondary text-secondary-foreground px-4 py-2 flex items-center gap-2 justify-between">
         <div className="font-semibold flex gap-2 items-center">
           <PlayIcon className="size-4" />
-          Включаться при запуске системы
+          {t("autostart")}
         </div>
         <AutoStartControlSwitch />
       </div>
       <div className="text-muted-foreground flex gap-2 items-center">
         <LayoutGridIcon className="size-4" />
-        Приложение
+        {t("app")}
       </div>
       <div className="rounded-xl bg-secondary text-secondary-foreground px-4 py-2 flex items-center gap-2 justify-between">
         <div className="font-semibold flex gap-2 items-center">
-          <KeyIcon className="size-4" /> Пароль настроек
+          <KeyIcon className="size-4" /> {t("settingsPassword")}
         </div>
         <ChangePasswordButton
-          buttonText="Сменить пароль"
+          buttonText={t("changePassword")}
           size="sm"
         ></ChangePasswordButton>
       </div>
       <div className="rounded-xl bg-secondary text-secondary-foreground px-4 py-2 flex flex-col gap-2">
         <div className="font-semibold flex gap-2 items-center">
           <MailIcon className="size-4" />
-          Электронный адрес родителя
+          {t("parentEmail")}
         </div>
         <Input
           className="font-mono w-48"

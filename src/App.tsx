@@ -12,6 +12,7 @@ import { listen } from "@tauri-apps/api/event";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
+import { t } from "@/intl";
 
 type TotalTimeEvent = number;
 
@@ -67,19 +68,19 @@ function App() {
             className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none transition-none"
             value="total-time"
           >
-            Всё время
+            {t("allTime")}
           </TabsTrigger>
           <TabsTrigger
             className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none transition-none"
             value="app-info"
           >
-            Время по приложениям
+            {t("appsTime")}
           </TabsTrigger>
           <TabsTrigger
             className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-none transition-none"
             value="settings"
           >
-            Настройки
+            {t("settings")}
           </TabsTrigger>
         </TabsList>
         <TabsContent
@@ -89,10 +90,10 @@ function App() {
           {/*<Button onClick={() => invoke("greet", { name: "Mark" })}>
             Отправить письмо
           </Button>*/}
-          <div className="text-muted-foreground">Время использования</div>
+          <div className="text-muted-foreground">{t("usageTime")}</div>
           <CustomNumberFlow
             className="font-black text-5xl"
-            suffix=" мин"
+            suffix={" " + t("min")}
             value={totalTime / 1000 / 60}
             format={{
               maximumFractionDigits: 2,
@@ -142,7 +143,7 @@ function App() {
                     <div className="font-semibold">{appName}</div>
                     <CustomNumberFlow
                       className="text-sm text-muted-foreground"
-                      suffix=" мин"
+                      suffix={" " + t("min")}
                       value={appTime / 1000 / 60}
                       format={{
                         maximumFractionDigits: 2,
@@ -163,10 +164,9 @@ function App() {
           ) : (
             <>
               <div className="flex flex-col gap-2 items-center text-center">
-                <h1 className="font-semibold text-3xl">Введите пароль</h1>
+                <h1 className="font-semibold text-3xl">{t("enterPassword")}</h1>
                 <p className="text-sm text-muted-foreground max-w-[60%]">
-                  Для доступа к настройкам требуется ввести установленный при
-                  первом запуске пароль
+                  {t("enterPasswordDesc")}
                 </p>
               </div>
               <InputOTP
@@ -178,7 +178,7 @@ function App() {
                   if (val === settings.password) {
                     setSettingsOpen(true);
                   } else {
-                    toast.error("Пароль неверный");
+                    toast.error(t("wrongPassword"));
                     setSettingsPassword("");
                   }
                 }}

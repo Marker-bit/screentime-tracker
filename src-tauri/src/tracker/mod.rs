@@ -63,51 +63,32 @@ pub fn start_tracking(app: &AppHandle) {
                             current_activity.app_name = active_window_title;
                         }
                     }
-                    let _ = menu
-                        .get("time")
-                        .expect("Didn't find menu element named \"time\"")
-                        .as_menuitem()
-                        .expect("\"time\" should be a menu item")
-                        .set_text(format!(
-                            "{:.1} мин сегодня",
-                            total_time as f32 / 1000f32 / 60f32
-                        ));
                     prev_move_time = info.dwTime;
-
-                    // let idle_time = info.dwTime - prev_input_time;
-                    // let idle_time_minutes = idle_time / 60000;
-                    // println!("idle_time = {idle_time}");
-
-                    // if idle_time_minutes < 5 {
-                    //     stats.active_minutes_today += 1;
-                    //     println!("active {} min", stats.active_minutes_today);
-                    // } else {
-                    //     println!("idle...");
-                    // }
-
-                    // let today = Local::now().format("%Y-%m-%d").to_string();
-                    // if today != stats.last_saved {
-                    //     stats.active_minutes_today = 0;
-                    //     stats.last_saved = today.clone();
-                    // }
-
-                    // save_stats(&stats);
                 }
                 Err(_) => {
                     println!("Failed to get last input info");
                 }
             };
-            let fake_local_time = total_time
+            let optimistic_local_time = total_time
                 + (if let Some(start_time) = current_activity.start_time {
                     current_tick_count - start_time
                 } else {
                     0
                 });
+            let _ = menu
+                .get("time")
+                .expect("Didn't find menu element named \"time\"")
+                .as_menuitem()
+                .expect("\"time\" should be a menu item")
+                .set_text(format!(
+                    "{:.1} мин сегодня",
+                    optimistic_local_time as f32 / 1000f32 / 60f32
+                ));
             app_clone
-                .emit("total-time", fake_local_time)
+                .emit("total-time", optimistic_local_time)
                 .expect("Failed to emit an event");
-            let mut apps_time_map_fake = apps_time_map.clone();
-            apps_time_map_fake.add(
+            let mut apps_time_map_optimistic = apps_time_map.clone();
+            apps_time_map_optimistic.add(
                 current_activity.app_name.clone(),
                 if let Some(start_time) = current_activity.start_time {
                     current_tick_count - start_time
@@ -119,8 +100,8 @@ pub fn start_tracking(app: &AppHandle) {
             if now.hour() == 22 && now.minute() == 31 && !triggered_today {
                 let email_content = generate_email_content(
                     Utc::now().date_naive(),
-                    fake_local_time / 1000 / 60,
-                    apps_time_map_fake.clone(),
+                    optimistic_local_time / 1000 / 60,
+                    apps_time_map_optimistic.clone(),
                 );
                 let store = app_clone.store("store.json").unwrap();
                 let settings_value = store.get("settings").unwrap();
@@ -144,22 +125,11 @@ pub fn start_tracking(app: &AppHandle) {
                     println!("Failed to send email: {}", e);
                 };
                 triggered_today = true;
-            } else if now.hour() != 20 {
+            } else if now.hour() != 22 {
                 triggered_today = false;
             }
-            // if apps_time_map_fake.contains_key(&current_activity.app_name) {
-            //     apps_time_map_fake.insert(
-            //         current_activity.app_name.clone(),
-            //         apps_time_map_fake.get(&current_activity.app_name).unwrap()
-            //             + (if let Some(start_time) = current_activity.start_time {
-            //                 current_tick_count - start_time
-            //             } else {
-            //                 0
-            //             }),
-            //     );
-            // }
             app_clone
-                .emit("apps-info", apps_time_map_fake.clone())
+                .emit("apps-info", apps_time_map_optimistic.clone())
                 .expect("Failed to emit an event");
 
             // println!("idle_time_minutes = {}", get_idle_time_minutes());

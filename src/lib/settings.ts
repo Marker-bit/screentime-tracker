@@ -6,6 +6,7 @@ interface SettingsState {
   disableAnimation: boolean;
   password: string | null;
   parentEmail: string;
+  language: string;
 }
 
 const store = await load("store.json", {
@@ -14,6 +15,7 @@ const store = await load("store.json", {
     disableAnimation: false,
     password: null,
     parentEmail: "",
+    language: "ru",
   },
 });
 
@@ -39,6 +41,7 @@ export const useSettingsStore = create<{
         disableAnimation: false,
         password: null,
         parentEmail: "",
+        language: "ru",
       },
       setSettings: (settings) =>
         set({ settings: { ...get().settings, ...settings } }),
