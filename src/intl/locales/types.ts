@@ -26,6 +26,7 @@ export type LocaleKeys =
   | "newPasswordSetDescription"
   | "close"
   | "enterPassword"
-  | "enterPasswordDesc";
+  | "enterPasswordDesc"
+  | "screenshotsFolder";
 
 export type Locale = Record<LocaleKeys, string>;

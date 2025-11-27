@@ -31,6 +31,7 @@ itertools = "0.12"
 tauri-plugin-store = "2"
 tauri-plugin-notification = "2"
 xcap = "0.7.1"
+dirs = "6.0.0"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-autostart = "2"

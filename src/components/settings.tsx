@@ -1,13 +1,12 @@
 import { AutoStartControlSwitch } from "@/components/autostart-control";
 import { ChangePasswordButton } from "@/components/change-password-button";
+import { ScreenshotFolder } from "@/components/screenshot-folder";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -18,7 +17,6 @@ import {
   ArrowUp10Icon,
   GlobeIcon,
   KeyIcon,
-  LayoutGrid,
   LayoutGridIcon,
   LockIcon,
   MailIcon,
@@ -113,6 +111,7 @@ export function Settings({ onLock }: { onLock: () => void }) {
           }}
         />
       </div>
+      <ScreenshotFolder />
     </div>
   );
 }

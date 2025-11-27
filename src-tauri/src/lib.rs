@@ -1,8 +1,10 @@
+use crate::commands::get_screenshots_dir;
 use crate::tracker::env::load_config;
 use rust_dotenv::dotenv::DotEnv;
 use tauri::{Emitter, Manager};
 use tauri_plugin_autostart::MacosLauncher;
 
+mod commands;
 mod tracker;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -31,6 +33,7 @@ pub fn run() {
 
             Ok(())
         })
+        .invoke_handler(tauri::generate_handler![get_screenshots_dir])
         .plugin(tauri_plugin_opener::init())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

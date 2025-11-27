@@ -31,6 +31,7 @@ const locale: Locale = {
   enterPassword: "Введите пароль",
   enterPasswordDesc:
     "Для доступа к настройкам требуется ввести установленный при первом запуске пароль",
+  screenshotsFolder: "Папка снимков экрана",
 };
 
 export default locale;

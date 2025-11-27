@@ -11,12 +11,14 @@ use lettre::{
 
 use crate::tracker::{apps_time_map::AppsTimeMap, env::AppConfig};
 
+/// Struct that represents the content of an email to be sent.
 #[derive(Debug)]
 pub struct EmailContent {
     subject: String,
     body: String,
 }
 
+/// Function that generates email body with total time and apps time
 fn generate_email_body(date: NaiveDate, time_mins: u32, apps_time_map: AppsTimeMap) -> String {
     let date_text = date.format("%d.%m.%Y").to_string();
     let apps_info = apps_time_map
@@ -39,6 +41,7 @@ fn generate_email_body(date: NaiveDate, time_mins: u32, apps_time_map: AppsTimeM
     )
 }
 
+/// Function that generates email content to send
 pub fn generate_email_content(
     date: NaiveDate,
     time_mins: u32,
@@ -51,49 +54,46 @@ pub fn generate_email_content(
     }
 }
 
+/// A simple function to create a mailbox
+fn create_mailbox(email: &str) -> Result<Mailbox, String> {
+    Ok(Mailbox::new(
+        None,
+        email.parse().map_err(|o: AddressError| {
+            format!(
+                "Failed to create a mailbox from {}, err: {}",
+                email,
+                o.to_string()
+            )
+        })?,
+    ))
+}
+
 pub fn send_email(
     app_config: &AppConfig,
     email_content: EmailContent,
     email_to: String,
 ) -> Result<(), String> {
     let email = Message::builder()
-        .from(Mailbox::new(
-            None,
-            app_config.smtp_user.parse().map_err(|o: AddressError| {
-                format!(
-                    "Failed to create a mailbox from {}, err: {}",
-                    app_config.smtp_user,
-                    o.to_string()
-                )
-            })?,
-        ))
-        .to(Mailbox::new(
-            None,
-            email_to.parse().map_err(|o: AddressError| {
-                format!(
-                    "Failed to create a mailbox to {email_to}, err: {}",
-                    o.to_string()
-                )
-            })?,
-        ))
+        .from(create_mailbox(&app_config.smtp_user)?)
+        .to(create_mailbox(email_to.as_str())?)
         .subject(email_content.subject)
         .header(ContentType::TEXT_HTML)
         .body(email_content.body)
         .map_err(|o| o.to_string())?;
 
+    // Create credentials for authorizing on the SMTP server
     let creds = Credentials::new(app_config.smtp_user.clone(), app_config.smtp_pass.clone());
 
-    // Open a remote connection to gmail
-    let mailer = SmtpTransport::relay(&app_config.smtp_host)
-        .map_err(|o| {
-            format!(
-                "Failed to create an smtp transport with {}, err: {}",
-                &app_config.smtp_host,
-                o.to_string()
-            )
-        })?
-        .credentials(creds)
-        .build();
+    // Open a remote connection to SMTP server
+    let builder = SmtpTransport::relay(&app_config.smtp_host).map_err(|o| {
+        format!(
+            "Failed to create an smtp transport with {}, err: {}",
+            &app_config.smtp_host,
+            o.to_string()
+        )
+    })?;
+
+    let mailer = builder.credentials(creds).build();
 
     // Send the email
     match mailer.send(&email) {

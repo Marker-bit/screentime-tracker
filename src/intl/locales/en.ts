@@ -31,6 +31,7 @@ const locale: Locale = {
   enterPassword: "Enter your password",
   enterPasswordDesc:
     "To access settings, you need to enter the password set during the first launch",
+  screenshotsFolder: "Screenshots folder",
 };
 
 export default locale;

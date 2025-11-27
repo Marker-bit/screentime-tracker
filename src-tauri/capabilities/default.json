@@ -9,6 +9,17 @@
     "store:allow-load",
     "store:allow-set",
     "store:allow-get",
-    "store:allow-delete"
+    "store:allow-delete",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        {
+          "path": "**/ScreentimeTracker/screenshots"
+        },
+        {
+          "path": "$APPDATA/file"
+        }
+      ]
+    }
   ]
 }

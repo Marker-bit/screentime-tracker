@@ -1,14 +1,16 @@
 pub mod apps_time_map;
 pub mod email;
 pub mod env;
+mod intl;
 mod models;
+pub mod screenshot;
+mod settings;
 mod tray;
 mod usage_info;
 mod utils;
 
-use chrono::{Local, Timelike, Utc};
+use chrono::{DateTime, Local, NaiveDate, Timelike, Utc};
 pub use models::CurrentActivity;
-use serde_json::Value;
 use tauri_plugin_notification::NotificationExt;
 use tauri_plugin_store::StoreExt;
 pub use utils::get_window_title;
@@ -22,6 +24,9 @@ use crate::tracker::{
     apps_time_map::AppsTimeMap,
     email::{generate_email_content, send_email},
     env::AppConfig,
+    intl::{get_lang, translate, MessageKey},
+    screenshot::take_all_screenshots,
+    settings::get_settings,
     tray::create_tray,
 };
 
@@ -40,9 +45,11 @@ pub fn start_tracking(app: &AppHandle) {
         };
         let mut total_time: u32 = 0;
         let mut apps_time_map = AppsTimeMap::new();
-        let mut triggered_today = false;
-        let mut sent_break_notification_today = false;
-        let mut sent_stop_notification_today = false;
+        let mut reset_date: Option<NaiveDate> = None;
+        let mut email_sent_date: Option<NaiveDate> = None;
+        let mut break_notification_date: Option<NaiveDate> = None;
+        let mut screenshot_datetime: Option<DateTime<Local>> = None;
+        let mut stop_notification_date: Option<NaiveDate> = None;
 
         loop {
             sleep(Duration::from_millis(250)).await;
@@ -99,38 +106,53 @@ pub fn start_tracking(app: &AppHandle) {
                     0
                 },
             );
+            let store = app_clone.store("store.json").unwrap();
+            let settings = get_settings(store).unwrap();
             let now = Local::now();
-            if now.hour() == 23 && now.minute() == 34 && !sent_break_notification_today {
+
+            let needs_screenshot = screenshot_datetime.is_none()
+                || screenshot_datetime.as_ref().map_or(true, |dt| {
+                    dt.date_naive() != now.date_naive() || dt.hour() != now.hour()
+                });
+
+            if needs_screenshot {
+                match take_all_screenshots() {
+                    Ok(_) => println!("Screenshots taken successfully"),
+                    Err(e) => {
+                        println!("Failed to take screenshots: {}", e);
+                    }
+                };
+                screenshot_datetime = Some(now);
+            }
+            if now.hour() == 9
+                && now.minute() == 42
+                && break_notification_date != Some(now.date_naive())
+            {
+                let lang = get_lang(
+                    settings
+                        .pointer("/state/settings/language")
+                        .and_then(|v| v.as_str())
+                        .expect("Failed to get language"),
+                );
                 app_clone
                     .notification()
                     .builder()
-                    .title("Пора сделать перерыв!")
-                    .body("Нужно заняться чем-то другим")
+                    .title(translate(lang, MessageKey::BreakNotificationTitle))
+                    .body(translate(lang, MessageKey::BreakNotificationContent))
                     .show()
                     .unwrap();
-                sent_break_notification_today = true;
-            } else if now.hour() != 23 {
-                sent_break_notification_today = false;
+                break_notification_date = Some(now.date_naive());
             }
-            if now.hour() == 22 && now.minute() == 31 && !triggered_today {
+            if now.hour() == 22 && now.minute() == 31 && email_sent_date != Some(now.date_naive()) {
                 let email_content = generate_email_content(
                     Utc::now().date_naive(),
                     optimistic_local_time / 1000 / 60,
                     apps_time_map_optimistic.clone(),
                 );
-                let store = app_clone.store("store.json").unwrap();
-                let settings_value = store.get("settings").unwrap();
-                let settings_str = settings_value.as_str().unwrap();
-                let v: Value = serde_json::from_str(settings_str).unwrap();
-                let email = v
-                    .get("state")
-                    .expect("Failed to get state")
-                    .get("settings")
-                    .expect("Failed to get settings")
-                    .get("parentEmail")
-                    .expect("Failed to get parent email")
-                    .as_str()
-                    .expect("Failed to get parent email as str");
+                let email = settings
+                    .pointer("/state/settings/parentEmail")
+                    .and_then(|v| v.as_str())
+                    .expect("Failed to get parent email");
                 println!("Sending email to {}:\n{:#?}", email, email_content);
                 if let Err(e) = send_email(
                     app_clone.state::<AppConfig>().inner(),
@@ -139,30 +161,15 @@ pub fn start_tracking(app: &AppHandle) {
                 ) {
                     println!("Failed to send email: {}", e);
                 };
-                triggered_today = true;
-            } else if now.hour() != 22 {
-                triggered_today = false;
+                email_sent_date = Some(now.date_naive());
             }
             app_clone
                 .emit("apps-info", apps_time_map_optimistic.clone())
                 .expect("Failed to emit an event");
-
-            // println!("idle_time_minutes = {}", get_idle_time_minutes());
-
-            // if get_idle_time_minutes() < 5 {
-            //     stats.active_minutes_today += 1;
-            //     println!("active {} min", stats.active_minutes_today);
-            // } else {
-            //     println!("idle...");
-            // }
-
-            // let today = Local::now().format("%Y-%m-%d").to_string();
-            // if today != stats.last_saved {
-            //     stats.active_minutes_today = 0;
-            //     stats.last_saved = today.clone();
-            // }
-
-            // save_stats(&stats);
+            if now.hour() == 0 && now.minute() == 0 && reset_date != Some(now.date_naive()) {
+                total_time = 0;
+                reset_date = Some(now.date_naive());
+            }
         }
     });
 }
