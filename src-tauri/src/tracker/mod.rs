@@ -9,6 +9,7 @@ mod utils;
 use chrono::{Local, Timelike, Utc};
 pub use models::CurrentActivity;
 use serde_json::Value;
+use tauri_plugin_notification::NotificationExt;
 use tauri_plugin_store::StoreExt;
 pub use utils::get_window_title;
 
@@ -40,6 +41,8 @@ pub fn start_tracking(app: &AppHandle) {
         let mut total_time: u32 = 0;
         let mut apps_time_map = AppsTimeMap::new();
         let mut triggered_today = false;
+        let mut sent_break_notification_today = false;
+        let mut sent_stop_notification_today = false;
 
         loop {
             sleep(Duration::from_millis(250)).await;
@@ -97,6 +100,18 @@ pub fn start_tracking(app: &AppHandle) {
                 },
             );
             let now = Local::now();
+            if now.hour() == 23 && now.minute() == 34 && !sent_break_notification_today {
+                app_clone
+                    .notification()
+                    .builder()
+                    .title("Пора сделать перерыв!")
+                    .body("Нужно заняться чем-то другим")
+                    .show()
+                    .unwrap();
+                sent_break_notification_today = true;
+            } else if now.hour() != 23 {
+                sent_break_notification_today = false;
+            }
             if now.hour() == 22 && now.minute() == 31 && !triggered_today {
                 let email_content = generate_email_content(
                     Utc::now().date_naive(),
