@@ -10,6 +10,7 @@ pub fn create_tray(app: &AppHandle) -> Menu<Wry> {
     let menu = Menu::with_items(app, &[&time_i, &quit_i]).unwrap();
 
     TrayIconBuilder::new()
+        .icon(app.default_window_icon().unwrap().clone())
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_tray_icon_event(|icon, event| match event {

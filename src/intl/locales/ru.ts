@@ -32,6 +32,9 @@ const locale: Locale = {
   enterPasswordDesc:
     "Для доступа к настройкам требуется ввести установленный при первом запуске пароль",
   screenshotsFolder: "Папка снимков экрана",
+  breakNotificationTime: "Время перерыва",
+  breakNotificationTimeDesc:
+    "При таком количестве минут будет отправлено уведомление о перерыве",
 };
 
 export default locale;

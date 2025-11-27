@@ -24,7 +24,7 @@ use crate::tracker::{
     apps_time_map::AppsTimeMap,
     email::{generate_email_content, send_email},
     env::AppConfig,
-    intl::{get_lang, translate, MessageKey},
+    intl::{MessageKey, get_lang, translate},
     screenshot::take_all_screenshots,
     settings::get_settings,
     tray::create_tray,
@@ -49,7 +49,6 @@ pub fn start_tracking(app: &AppHandle) {
         let mut email_sent_date: Option<NaiveDate> = None;
         let mut break_notification_date: Option<NaiveDate> = None;
         let mut screenshot_datetime: Option<DateTime<Local>> = None;
-        let mut stop_notification_date: Option<NaiveDate> = None;
 
         loop {
             sleep(Duration::from_millis(250)).await;
@@ -79,7 +78,7 @@ pub fn start_tracking(app: &AppHandle) {
                     println!("Failed to get last input info");
                 }
             };
-            let optimistic_local_time = total_time
+            let optimistic_total_time = total_time
                 + (if let Some(start_time) = current_activity.start_time {
                     current_tick_count - start_time
                 } else {
@@ -92,10 +91,10 @@ pub fn start_tracking(app: &AppHandle) {
                 .expect("\"time\" should be a menu item")
                 .set_text(format!(
                     "{:.1} мин сегодня",
-                    optimistic_local_time as f32 / 1000f32 / 60f32
+                    optimistic_total_time as f32 / 1000f32 / 60f32
                 ));
             app_clone
-                .emit("total-time", optimistic_local_time)
+                .emit("total-time", optimistic_total_time)
                 .expect("Failed to emit an event");
             let mut apps_time_map_optimistic = apps_time_map.clone();
             apps_time_map_optimistic.add(
@@ -124,8 +123,17 @@ pub fn start_tracking(app: &AppHandle) {
                 };
                 screenshot_datetime = Some(now);
             }
-            if now.hour() == 9
-                && now.minute() == 42
+            let break_notification_time = settings
+                .pointer("/state/settings/breakNotificationTime")
+                .and_then(|v| {
+                    if v.is_u64() {
+                        Some(v.as_u64().unwrap())
+                    } else {
+                        None
+                    }
+                });
+            if let Some(num) = break_notification_time
+                && (optimistic_total_time / 1000 / 60) as u64 >= num
                 && break_notification_date != Some(now.date_naive())
             {
                 let lang = get_lang(
@@ -143,10 +151,10 @@ pub fn start_tracking(app: &AppHandle) {
                     .unwrap();
                 break_notification_date = Some(now.date_naive());
             }
-            if now.hour() == 22 && now.minute() == 31 && email_sent_date != Some(now.date_naive()) {
+            if now.hour() == 20 && now.minute() == 0 && email_sent_date != Some(now.date_naive()) {
                 let email_content = generate_email_content(
                     Utc::now().date_naive(),
-                    optimistic_local_time / 1000 / 60,
+                    optimistic_total_time / 1000 / 60,
                     apps_time_map_optimistic.clone(),
                 );
                 let email = settings

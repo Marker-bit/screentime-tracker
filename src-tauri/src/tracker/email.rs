@@ -3,10 +3,10 @@ use std::cmp::Reverse;
 use chrono::NaiveDate;
 use itertools::Itertools;
 use lettre::{
-    address::AddressError,
-    message::{header::ContentType, Mailbox},
-    transport::smtp::authentication::Credentials,
     Message, SmtpTransport, Transport,
+    address::AddressError,
+    message::{Mailbox, header::ContentType},
+    transport::smtp::authentication::Credentials,
 };
 
 use crate::tracker::{apps_time_map::AppsTimeMap, env::AppConfig};
@@ -18,6 +18,21 @@ pub struct EmailContent {
     body: String,
 }
 
+/// Function that turns time in minutes into "x часов y минут"
+fn get_mins_text(time_mins: f32) -> String {
+    if time_mins < 1f32 {
+        format!("{} секунд", time_mins * 60f32)
+    } else if time_mins < 60f32 {
+        format!("{:.0} минут", time_mins)
+    } else {
+        format!(
+            "{:.0} часов {:.0} минут",
+            time_mins / 60f32,
+            time_mins % 60f32
+        )
+    }
+}
+
 /// Function that generates email body with total time and apps time
 fn generate_email_body(date: NaiveDate, time_mins: u32, apps_time_map: AppsTimeMap) -> String {
     let date_text = date.format("%d.%m.%Y").to_string();
@@ -25,19 +40,13 @@ fn generate_email_body(date: NaiveDate, time_mins: u32, apps_time_map: AppsTimeM
         .iter()
         .sorted_by_key(|(_, time)| Reverse(*time))
         .map(|(app_name, time)| {
-            let app_time_mins = time / 1000 / 60;
-            format!(
-                "<b>{}</b>: {} часов {} минут",
-                app_name,
-                app_time_mins / 60,
-                app_time_mins % 60
-            )
+            let app_time_mins = *time as f32 / 1000f32 / 60f32;
+            format!("<b>{}</b>: {}", app_name, get_mins_text(app_time_mins))
         });
     let apps_body = apps_info.collect::<Vec<String>>().join("<br />");
     format!(
-        "За сегодня, {date_text}, общее время активной работы за компьютером составило: {} часов {} минут.<br /><br />{apps_body}",
-        time_mins / 60,
-        time_mins % 60
+        "За сегодня, {date_text}, общее время активной работы за компьютером составило: {}.<br /><br />{apps_body}",
+        get_mins_text(time_mins as f32)
     )
 }
 

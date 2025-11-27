@@ -15,6 +15,7 @@ import { t } from "@/intl";
 import { useSettingsStore } from "@/lib/settings";
 import {
   ArrowUp10Icon,
+  ClockIcon,
   GlobeIcon,
   KeyIcon,
   LayoutGridIcon,
@@ -29,7 +30,7 @@ export function Settings({ onLock }: { onLock: () => void }) {
   const { settings, setSettings } = useSettingsStore();
 
   return (
-    <div className="flex flex-col gap-2 min-w-100">
+    <div className="flex flex-col gap-2 min-w-100 max-h-[80vh] overflow-y-auto">
       <Button
         size="icon"
         variant="ghost"
@@ -110,6 +111,39 @@ export function Settings({ onLock }: { onLock: () => void }) {
             setSettings({ ...settings, parentEmail: evt.target.value });
           }}
         />
+      </div>
+      <div className="rounded-xl bg-secondary text-secondary-foreground px-4 py-2 flex gap-2 justify-between">
+        <div className="flex flex-col">
+          <div className="font-semibold flex gap-2 items-center">
+            <ClockIcon className="size-4" />
+            {t("breakNotificationTime")}
+          </div>
+          <div className="text-muted-foreground text-xs max-w-60">
+            {t("breakNotificationTimeDesc")}
+          </div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <Input
+            className="w-[6ch]"
+            value={settings.breakNotificationTime ?? "0"}
+            onChange={(evt) => {
+              setSettings({
+                ...settings,
+                breakNotificationTime: Number.parseInt(evt.target.value),
+              });
+            }}
+            disabled={settings.breakNotificationTime === null}
+          />
+          <Switch
+            checked={settings.breakNotificationTime !== null}
+            onCheckedChange={(val) => {
+              setSettings({
+                ...settings,
+                breakNotificationTime: val ? 0 : null,
+              });
+            }}
+          />
+        </div>
       </div>
       <ScreenshotFolder />
     </div>

@@ -27,6 +27,8 @@ export type LocaleKeys =
   | "close"
   | "enterPassword"
   | "enterPasswordDesc"
-  | "screenshotsFolder";
+  | "screenshotsFolder"
+  | "breakNotificationTime"
+  | "breakNotificationTimeDesc";
 
 export type Locale = Record<LocaleKeys, string>;

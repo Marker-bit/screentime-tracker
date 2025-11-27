@@ -7,6 +7,7 @@ interface SettingsState {
   password: string | null;
   parentEmail: string;
   language: string;
+  breakNotificationTime: number | null;
 }
 
 const store = await load("store.json", {
@@ -16,6 +17,7 @@ const store = await load("store.json", {
     password: null,
     parentEmail: "",
     language: "ru",
+    breakNotificationTime: null,
   },
 });
 
@@ -42,6 +44,7 @@ export const useSettingsStore = create<{
         password: null,
         parentEmail: "",
         language: "ru",
+        breakNotificationTime: null,
       },
       setSettings: (settings) =>
         set({ settings: { ...get().settings, ...settings } }),

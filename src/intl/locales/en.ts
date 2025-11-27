@@ -32,6 +32,9 @@ const locale: Locale = {
   enterPasswordDesc:
     "To access settings, you need to enter the password set during the first launch",
   screenshotsFolder: "Screenshots folder",
+  breakNotificationTime: "Break time",
+  breakNotificationTimeDesc:
+    "With this amount of spent time, a notification about taking a break will show",
 };
 
 export default locale;
