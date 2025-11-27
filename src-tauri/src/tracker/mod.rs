@@ -75,7 +75,7 @@ pub fn start_tracking(app: &AppHandle) {
                     if info.dwTime != prev_move_time && current_activity.start_time.is_none() {
                         current_activity.start_time = Some(info.dwTime);
                     }
-                    if (current_tick_count - info.dwTime > 50000
+                    if (current_tick_count - info.dwTime > (5 * 1000 * 60)
                         || current_activity.app_name.clone() != active_window_title)
                         && current_activity.start_time.is_some()
                     {
