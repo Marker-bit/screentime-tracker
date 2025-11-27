@@ -39,8 +39,16 @@ pub fn start_tracking(app: &AppHandle) {
         let current_tick_count = get_tick_count();
         let program_start_time = current_tick_count;
         let mut prev_move_time = current_tick_count;
+        let store = app_clone.store("store.json").unwrap();
+        let settings = get_settings(store).unwrap();
+        let lang = get_lang(
+            settings
+                .pointer("/state/settings/language")
+                .and_then(|v| v.as_str())
+                .expect("Failed to get language"),
+        );
         let mut current_activity = CurrentActivity {
-            app_name: get_window_title(),
+            app_name: get_window_title(lang),
             start_time: None,
         };
         let mut total_time: u32 = 0;
@@ -52,7 +60,15 @@ pub fn start_tracking(app: &AppHandle) {
 
         loop {
             sleep(Duration::from_millis(250)).await;
-            let active_window_title = get_window_title();
+            let store = app_clone.store("store.json").unwrap();
+            let settings = get_settings(store).unwrap();
+            let lang = get_lang(
+                settings
+                    .pointer("/state/settings/language")
+                    .and_then(|v| v.as_str())
+                    .expect("Failed to get language"),
+            );
+            let active_window_title = get_window_title(lang);
             let current_tick_count = get_tick_count();
             match get_last_input_info(program_start_time) {
                 Ok(info) => {
@@ -105,8 +121,6 @@ pub fn start_tracking(app: &AppHandle) {
                     0
                 },
             );
-            let store = app_clone.store("store.json").unwrap();
-            let settings = get_settings(store).unwrap();
             let now = Local::now();
 
             let needs_screenshot = screenshot_datetime.is_none()
@@ -136,12 +150,6 @@ pub fn start_tracking(app: &AppHandle) {
                 && (optimistic_total_time / 1000 / 60) as u64 >= num
                 && break_notification_date != Some(now.date_naive())
             {
-                let lang = get_lang(
-                    settings
-                        .pointer("/state/settings/language")
-                        .and_then(|v| v.as_str())
-                        .expect("Failed to get language"),
-                );
                 app_clone
                     .notification()
                     .builder()
