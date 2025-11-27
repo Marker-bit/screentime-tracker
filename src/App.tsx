@@ -29,8 +29,9 @@ function App() {
   listen<Record<string, number>>("apps-info", (event) => {
     setAppsInfo(event.payload);
   });
-  listen<undefined>("lock", (event) => {
+  listen<undefined>("lock", () => {
     setSettingsOpen(false);
+    setSettingsPassword("");
   });
 
   if (!settings.password) {
@@ -50,10 +51,10 @@ function App() {
           }}
         >
           <InputOTPGroup>
-            <InputOTPSlot index={0} />
-            <InputOTPSlot index={1} />
-            <InputOTPSlot index={2} />
-            <InputOTPSlot index={3} />
+            <InputOTPSlot password index={0} />
+            <InputOTPSlot password index={1} />
+            <InputOTPSlot password index={2} />
+            <InputOTPSlot password index={3} />
           </InputOTPGroup>
         </InputOTP>
       </main>
@@ -160,7 +161,12 @@ function App() {
           className="flex flex-col items-center justify-center gap-4"
         >
           {settingsOpen ? (
-            <Settings onLock={() => setSettingsOpen(false)} />
+            <Settings
+              onLock={() => {
+                setSettingsOpen(false);
+                setSettingsPassword("");
+              }}
+            />
           ) : (
             <>
               <div className="flex flex-col gap-2 items-center text-center">
@@ -184,10 +190,10 @@ function App() {
                 }}
               >
                 <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                  <InputOTPSlot index={3} />
+                  <InputOTPSlot password index={0} />
+                  <InputOTPSlot password index={1} />
+                  <InputOTPSlot password index={2} />
+                  <InputOTPSlot password index={3} />
                 </InputOTPGroup>
               </InputOTP>
             </>

@@ -125,10 +125,10 @@ export function ChangePasswordButton({
               }}
             >
               <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-                <InputOTPSlot index={3} />
+                <InputOTPSlot password index={0} />
+                <InputOTPSlot password index={1} />
+                <InputOTPSlot password index={2} />
+                <InputOTPSlot password index={3} />
               </InputOTPGroup>
             </InputOTP>
           </div>
