@@ -1,7 +1,57 @@
-# Tauri + React + Typescript
+# Трекер времени
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+Трекер экранного времени для родителей — приложение, отслеживающее экранное время пользователя компьютера.
+Оно может:
+- уведомлять о большом количестве экранного времени
+- делать скриншоты каждый час
+- присылать полную сводку использования компьютера за день на электронную почту
+- показывать ребёнку текущее количество экранного времени
+- автоматически запускаться при запуске компьютера
+- отображаться в трее, показывая текущее время использования
+- считать время использования по приложениям
 
-## Recommended IDE Setup
+## Используемые технологии
+Фронтенд:
+- React
+- shadcn/ui
+- NumberFlow
+- Motion
+- Zustand
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+Бэкенд:
+- Rust
+- Tauri
+- windows-rs
+- xcap
+- lettre
+- Serde
+
+## Запуск
+
+Для запуска приложения выполните следующие шаги:
+
+1. Установите Rust на вашем компьютере.
+2. Клонируйте репозиторий проекта:
+   ```bash
+   git clone https://github.com/Marker-bit/screentime-tracker.git
+   ```
+3. Перейдите в директорию проекта:
+   ```bash
+   cd screentime-tracker
+   ```
+4. Заполните .env файл:
+   ```
+   SMTP_HOST - сервер SMTP (например, smtp.yandex.ru)
+   SMTP_USER - юзернейм для SMTP (например, user@yandex.ru. Также используется как email для отправки писем)
+   SMTP_PASS - пароль для SMTP (для Яндекса нужно сгенерировать пароль приложения)
+   ```
+5. Запустите приложение:
+   ```bash
+   cargo run
+   ```
+
+## Настройка
+
+Вся настройка производится родителем в приложении. Для этого необходимо открыть настройки приложения с помощью нажатия по иконке в трее и ввести необходимые данные.
+
+При первом запуске требуется нажать на иконку в трее и ввести пароль для доступа к приложению.
